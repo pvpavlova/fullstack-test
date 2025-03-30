@@ -1,28 +1,25 @@
-import { Injectable } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
-import { UsersService } from "../users/users.service";
-import { User } from "../users/user.entity";
+import { Injectable } from '@nestjs/common';
+import { User } from '../users/user.entity';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    private readonly usersService: UsersService,
-    private readonly jwtService: JwtService
-  ) {}
+  constructor(private usersService: UsersService) {}
 
-  async validateUser(username: string, pass: string): Promise<any> {
-    const user = await this.usersService.findOne(username);
-    if (user && user.password === pass) {
-      const { password, ...result } = user;
-      return result;
+  async login(loginDto: LoginDto): Promise<User> {
+    const user = await this.usersService.findByUsername(loginDto.username);
+    if (!user || user.password !== loginDto.password) {
+      throw new Error('Invalid credentials');
     }
-    return null;
+    return user;
   }
 
-  async login(user: User) {
-    const payload = { username: user.username, sub: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+  async register(registerDto: RegisterDto): Promise<User> {
+    const user = new User();
+    user.username = registerDto.username;
+    user.password = registerDto.password;
+    return await this.usersService.create(user);
   }
 }

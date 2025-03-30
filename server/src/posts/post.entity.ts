@@ -1,30 +1,23 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-} from "typeorm";
-import { User } from "../users/user.entity";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { User } from '../users/user.entity';
 
 @Entity()
 export class Post {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  text: string;
+  text!: string;
 
-  @Column({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
-  createdAt: Date;
+  @Column()
+  createdAt!: Date;
 
-  @Column("simple-array", { nullable: true })
-  images: string[];
+  @Column("simple-array")
+  images!: string[];
 
   @ManyToOne(() => User, (user) => user.posts)
-  @JoinColumn({ name: "userId" })
-  user: User;
+  user!: User;
 
   @Column()
-  userId: number;
+  userId!: number;
 }

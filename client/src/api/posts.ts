@@ -8,7 +8,7 @@ export const fetchPosts = async (page: number, limit: number) => {
 };
 
 export const fetchUserProfile = async () => {
-  const { data } = await api.get("/user/profile");
+  const { data } = await api.get("/users/profile");
   return data;
 };
 

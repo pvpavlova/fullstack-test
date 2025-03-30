@@ -19,7 +19,7 @@ services:
     depends_on:
       - db
     environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/social_media
+      - DATABASE_URL=postgres://postgres:111992@db:5432/social_media
     volumes:
       - .:/usr/src/app
 

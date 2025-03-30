@@ -1,55 +1,55 @@
-import {
-  Controller,
-  Get,
-  Put,
-  Param,
-  Body,
-  UseInterceptors,
-  UploadedFile,
-} from "@nestjs/common";
-import { UsersService } from "./users.service";
-import { User } from "./user.entity";
-import { UpdateUserDto } from "../common/dto/update-user.dto";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { join } from "path";
-import { v4 as uuidv4 } from "uuid";
+import { 
+  Controller, 
+  Get, 
+  Post, 
+  Body, 
+  Param, 
+  UseInterceptors, 
+  UploadedFile 
+} from '@nestjs/common';
+import { UsersService } from './users.service';
+import { User } from './user.entity';
+import { RegisterDto } from '../auth/dto/register.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 
-@Controller("users")
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
+  @Post()
+  async create(@Body() registerDto: RegisterDto): Promise<User> {
+    return this.usersService.create(registerDto);
+  }
 
-  @Get(":id")
-  async findOne(@Param("id") id: number): Promise<User> {
+  @Get()
+  async findAll(): Promise<User[]> {
+    return this.usersService.findAll();
+  }
+
+  @Get(':id')
+  async findOne(@Param('id') id: number): Promise<User> {
     return this.usersService.findOne(id);
   }
-
-  @Put(":id")
-  async update(
-    @Param("id") id: number,
-    @Body() updateUserDto: UpdateUserDto
-  ): Promise<User> {
-    return this.usersService.update(id, updateUserDto);
+  @Get('profile')
+  async getProfile(): Promise<User> {
+    const users = await this.usersService.findAll();
+    return users[0];
   }
-
-  @Put(":id/avatar")
+  @Post('upload-avatar')
   @UseInterceptors(
-    FileInterceptor("avatar", {
+    FileInterceptor('avatar', {
       storage: diskStorage({
-        destination: "./uploads/avatars",
-        filename: (req, file, cb) => {
-          const filename = `${uuidv4()}-${file.originalname}`;
-          cb(null, filename);
+        destination: './uploads/avatars',
+        filename: (req, file, callback) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          callback(null, file.fieldname + '-' + uniqueSuffix + extname(file.originalname));
         },
       }),
-    })
+    }),
   )
-  async updateAvatar(
-    @Param("id") id: number,
-    @UploadedFile() file: Express.Multer.File
-  ): Promise<User> {
-    const avatarPath = join("uploads", "avatars", file.filename);
-    return this.usersService.updateAvatar(id, avatarPath);
+  async uploadAvatar(@UploadedFile() file: Express.Multer.File): Promise<{ filename: string }> {
+    return { filename: file.filename };
   }
 }

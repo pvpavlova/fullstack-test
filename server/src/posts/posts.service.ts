@@ -26,10 +26,14 @@ export class PostsService {
     });
   }
 
+  
   async findOne(id: number): Promise<Post> {
-    return this.postsRepository.findOne(id);
+    const post = await this.postsRepository.findOne({ where: { id } });
+    if (!post) {
+      throw new Error('Post not found');
+    }
+    return post;
   }
-
   async create(createPostDto: CreatePostDto): Promise<Post> {
     const post = this.postsRepository.create(createPostDto);
     return this.postsRepository.save(post);
@@ -37,7 +41,11 @@ export class PostsService {
 
   async update(id: number, updatePostDto: UpdatePostDto): Promise<Post> {
     await this.postsRepository.update(id, updatePostDto);
-    return this.postsRepository.findOne(id);
+    const updatedPost = await this.postsRepository.findOne({ where: { id } });
+    if (!updatedPost) {
+      throw new Error('Post not found');
+    }
+    return updatedPost;
   }
 
 
